@@ -1,0 +1,183 @@
+{
+  "escalation_policies": [
+    {
+      "id": "POLICY-001",
+      "name": "Repeated Unresolved Issues",
+      "condition": {
+        "type": "metadata",
+        "field": "prior_contact_count",
+        "operator": ">=",
+        "value": 3
+      },
+      "action": "escalate",
+      "target_team": "Senior Support",
+      "priority": "high",
+      "description": "When a customer has contacted support 3 or more times and the issue remains unresolved, escalate to Senior Support team for dedicated attention."
+    },
+    {
+      "id": "POLICY-002",
+      "name": "Security and Fraud Issues",
+      "condition": {
+        "type": "keyword",
+        "keywords": ["fraud", "fraudulent", "unauthorized charge", "hacked", "security breach", "stolen", "scam", "phishing"],
+        "match_type": "any"
+      },
+      "action": "escalate",
+      "target_team": "Security Team",
+      "priority": "critical",
+      "description": "Any mention of fraud, unauthorized access, or security concerns must be immediately escalated to the Security Team."
+    },
+    {
+      "id": "POLICY-003",
+      "name": "High-Value Refund Requests",
+      "condition": {
+        "type": "composite",
+        "rules": [
+          {
+            "type": "keyword",
+            "keywords": ["refund", "money back", "charge back"],
+            "match_type": "any"
+          },
+          {
+            "type": "amount",
+            "operator": ">",
+            "value": 500
+          }
+        ],
+        "logic": "AND"
+      },
+      "action": "escalate",
+      "target_team": "Financial Team",
+      "priority": "high",
+      "description": "Refund requests exceeding $500 require Financial Team approval and oversight."
+    },
+    {
+      "id": "POLICY-004",
+      "name": "Explicit Escalation Request",
+      "condition": {
+        "type": "keyword",
+        "keywords": ["speak to manager", "talk to supervisor", "escalate", "manager", "supervisor", "higher level"],
+        "match_type": "any"
+      },
+      "action": "escalate",
+      "target_team": "Supervisor",
+      "priority": "medium",
+      "description": "When a customer explicitly requests to speak with a manager or supervisor, honor their request."
+    },
+    {
+      "id": "POLICY-005",
+      "name": "Legal Threats",
+      "condition": {
+        "type": "keyword",
+        "keywords": ["lawyer", "attorney", "lawsuit", "legal action", "sue", "court", "legal"],
+        "match_type": "any"
+      },
+      "action": "escalate",
+      "target_team": "Legal Team",
+      "priority": "critical",
+      "description": "Any threats of legal action must be immediately routed to the Legal Team."
+    },
+    {
+      "id": "POLICY-006",
+      "name": "Complex Technical Issues",
+      "condition": {
+        "type": "composite",
+        "rules": [
+          {
+            "type": "keyword",
+            "keywords": ["bug", "crash", "error", "not working", "broken", "technical issue"],
+            "match_type": "any"
+          },
+          {
+            "type": "sentiment",
+            "value": "frustrated"
+          }
+        ],
+        "logic": "AND"
+      },
+      "action": "escalate",
+      "target_team": "Technical Support",
+      "priority": "medium",
+      "description": "Persistent technical issues causing customer frustration should be escalated to specialized Technical Support."
+    },
+    {
+      "id": "POLICY-007",
+      "name": "Account Cancellation",
+      "condition": {
+        "type": "keyword",
+        "keywords": ["cancel account", "close account", "delete account", "cancel subscription", "unsubscribe"],
+        "match_type": "any"
+      },
+      "action": "escalate",
+      "target_team": "Retention Team",
+      "priority": "high",
+      "description": "Account cancellation requests should be routed to the Retention Team for possible resolution."
+    },
+    {
+      "id": "POLICY-008",
+      "name": "Simple Inquiries - No Escalation",
+      "condition": {
+        "type": "composite",
+        "rules": [
+          {
+            "type": "keyword",
+            "keywords": ["where is my order", "order status", "tracking", "when will it arrive", "shipping"],
+            "match_type": "any"
+          },
+          {
+            "type": "metadata",
+            "field": "prior_contact_count",
+            "operator": "<",
+            "value": 2
+          }
+        ],
+        "logic": "AND"
+      },
+      "action": "no_escalate",
+      "target_team": null,
+      "priority": "low",
+      "description": "Simple order tracking inquiries can be handled by automated systems without escalation."
+    },
+    {
+      "id": "POLICY-009",
+      "name": "Payment Issues",
+      "condition": {
+        "type": "keyword",
+        "keywords": ["payment failed", "card declined", "billing error", "charged twice", "wrong amount"],
+        "match_type": "any"
+      },
+      "action": "conditional_escalate",
+      "target_team": "Billing Team",
+      "priority": "medium",
+      "description": "Payment and billing issues should be escalated if the customer has contacted more than once or the issue is complex.",
+      "escalation_threshold": {
+        "prior_contact_count": 2
+      }
+    },
+    {
+      "id": "POLICY-010",
+      "name": "Data Privacy Requests",
+      "condition": {
+        "type": "keyword",
+        "keywords": ["GDPR", "data privacy", "delete my data", "data request", "privacy rights", "personal information"],
+        "match_type": "any"
+      },
+      "action": "escalate",
+      "target_team": "Privacy Team",
+      "priority": "high",
+      "description": "Data privacy and GDPR-related requests must be handled by the Privacy Team to ensure compliance."
+    }
+  ],
+  "default_policy": {
+    "id": "POLICY-DEFAULT",
+    "name": "Default - Human Review",
+    "condition": {
+      "type": "default",
+      "description": "Catch-all for cases that don't match any specific policy"
+    },
+    "action": "escalate",
+    "target_team": "Human Review Queue",
+    "priority": "medium",
+    "description": "When no clear policy matches or confidence is low, route to human review."
+  }
+}

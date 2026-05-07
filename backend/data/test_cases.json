@@ -1,0 +1,369 @@
+{
+  "test_cases": [
+    {
+      "id": "TEST-001",
+      "name": "Billing - Charged Twice, Third Contact",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "I was charged twice for my subscription."},
+          {"role": "agent", "content": "I apologize for the inconvenience. Can you provide your order number?"},
+          {"role": "customer", "content": "This is my third time contacting support about this! Order #12345"}
+        ],
+        "metadata": {
+          "case_id": "CASE-001",
+          "customer_id": "CUST-001",
+          "prior_contact_count": 3,
+          "created_at": "2026-05-05T10:00:00Z",
+          "initial_category": "billing"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Senior Support",
+        "should_cite_policy": "POLICY-001"
+      },
+      "category": "clear_escalation"
+    },
+    {
+      "id": "TEST-002",
+      "name": "Security - Fraud Alert",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "I see unauthorized charges on my account!"},
+          {"role": "agent", "content": "I'm sorry to hear that. Can you tell me more?"},
+          {"role": "customer", "content": "Someone hacked my account and made fraudulent purchases"}
+        ],
+        "metadata": {
+          "case_id": "CASE-002",
+          "customer_id": "CUST-002",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T10:15:00Z",
+          "initial_category": "security"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Security Team",
+        "should_cite_policy": "POLICY-002"
+      },
+      "category": "clear_escalation"
+    },
+    {
+      "id": "TEST-003",
+      "name": "Simple Inquiry - Order Tracking",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "Where is my order?"},
+          {"role": "agent", "content": "Let me check that for you. What's your order number?"},
+          {"role": "customer", "content": "Order #67890"}
+        ],
+        "metadata": {
+          "case_id": "CASE-003",
+          "customer_id": "CUST-003",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T10:30:00Z",
+          "initial_category": "shipping"
+        }
+      },
+      "expected_output": {
+        "decision": "no_escalate",
+        "target_team": null,
+        "should_cite_policy": "POLICY-008"
+      },
+      "category": "clear_no_escalation"
+    },
+    {
+      "id": "TEST-004",
+      "name": "Legal Threat",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "I am very disappointed with your service."},
+          {"role": "agent", "content": "I apologize. How can I help resolve this?"},
+          {"role": "customer", "content": "If you don't fix this, I'll have to contact my lawyer"}
+        ],
+        "metadata": {
+          "case_id": "CASE-004",
+          "customer_id": "CUST-004",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T10:45:00Z",
+          "initial_category": "complaint"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Legal Team",
+        "should_cite_policy": "POLICY-005"
+      },
+      "category": "clear_escalation"
+    },
+    {
+      "id": "TEST-005",
+      "name": "Explicit Manager Request",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "I need help with my account"},
+          {"role": "agent", "content": "I'd be happy to help. What seems to be the issue?"},
+          {"role": "customer", "content": "I want to speak to a manager please"}
+        ],
+        "metadata": {
+          "case_id": "CASE-005",
+          "customer_id": "CUST-005",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T11:00:00Z",
+          "initial_category": "general"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Supervisor",
+        "should_cite_policy": "POLICY-004"
+      },
+      "category": "clear_escalation"
+    },
+    {
+      "id": "TEST-006",
+      "name": "High-Value Refund",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "I need to request a refund for my recent purchase"},
+          {"role": "agent", "content": "I can help with that. What was the order amount?"},
+          {"role": "customer", "content": "It was $750. The product doesn't work as advertised"}
+        ],
+        "metadata": {
+          "case_id": "CASE-006",
+          "customer_id": "CUST-006",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T11:15:00Z",
+          "initial_category": "refund"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Financial Team",
+        "should_cite_policy": "POLICY-003"
+      },
+      "category": "clear_escalation"
+    },
+    {
+      "id": "TEST-007",
+      "name": "Technical Issue - Persistent Bug",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "The app crashes every time I try to log in"},
+          {"role": "agent", "content": "Have you tried reinstalling the app?"},
+          {"role": "customer", "content": "Yes, multiple times. This is so frustrating!"}
+        ],
+        "metadata": {
+          "case_id": "CASE-007",
+          "customer_id": "CUST-007",
+          "prior_contact_count": 2,
+          "created_at": "2026-05-05T11:30:00Z",
+          "initial_category": "technical"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Technical Support",
+        "should_cite_policy": "POLICY-006"
+      },
+      "category": "clear_escalation"
+    },
+    {
+      "id": "TEST-008",
+      "name": "Account Cancellation Request",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "I'd like to cancel my subscription"},
+          {"role": "agent", "content": "I'm sorry to hear that. May I ask why?"},
+          {"role": "customer", "content": "I'm not using the service enough to justify the cost"}
+        ],
+        "metadata": {
+          "case_id": "CASE-008",
+          "customer_id": "CUST-008",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T11:45:00Z",
+          "initial_category": "cancellation"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Retention Team",
+        "should_cite_policy": "POLICY-007"
+      },
+      "category": "clear_escalation"
+    },
+    {
+      "id": "TEST-009",
+      "name": "Edge Case - Angry But Simple Issue",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "This is ridiculous! I can't believe this!"},
+          {"role": "agent", "content": "I apologize for the frustration. What's the issue?"},
+          {"role": "customer", "content": "My password reset email never arrived"}
+        ],
+        "metadata": {
+          "case_id": "CASE-009",
+          "customer_id": "CUST-009",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T12:00:00Z",
+          "initial_category": "account"
+        }
+      },
+      "expected_output": {
+        "decision": "no_escalate",
+        "target_team": null,
+        "should_cite_policy": null
+      },
+      "category": "edge_case",
+      "notes": "Emotional language but technically simple issue. System should recognize this as resolvable without escalation."
+    },
+    {
+      "id": "TEST-010",
+      "name": "Edge Case - Polite But Complex",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "Hello, I have a question about my billing"},
+          {"role": "agent", "content": "Happy to help! What's your question?"},
+          {"role": "customer", "content": "I was charged but I cancelled before the renewal date. This happened last month too."}
+        ],
+        "metadata": {
+          "case_id": "CASE-010",
+          "customer_id": "CUST-010",
+          "prior_contact_count": 2,
+          "created_at": "2026-05-05T12:15:00Z",
+          "initial_category": "billing"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Billing Team",
+        "should_cite_policy": "POLICY-009"
+      },
+      "category": "edge_case",
+      "notes": "Polite tone but repeated billing issue. Should escalate based on issue complexity and history."
+    },
+    {
+      "id": "TEST-011",
+      "name": "Data Privacy Request",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "I need to submit a GDPR data request"},
+          {"role": "agent", "content": "I can help route that for you. What type of request?"},
+          {"role": "customer", "content": "I want to see all personal information you have stored about me"}
+        ],
+        "metadata": {
+          "case_id": "CASE-011",
+          "customer_id": "CUST-011",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T12:30:00Z",
+          "initial_category": "privacy"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Privacy Team",
+        "should_cite_policy": "POLICY-010"
+      },
+      "category": "clear_escalation"
+    },
+    {
+      "id": "TEST-012",
+      "name": "Mixed Issue - Billing + Technical",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "I'm having two problems"},
+          {"role": "agent", "content": "I'll do my best to help. What are they?"},
+          {"role": "customer", "content": "First, I was charged twice. Second, the app won't let me view my billing history"}
+        ],
+        "metadata": {
+          "case_id": "CASE-012",
+          "customer_id": "CUST-012",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T12:45:00Z",
+          "initial_category": "mixed"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Billing Team",
+        "should_cite_policy": "POLICY-009"
+      },
+      "category": "edge_case",
+      "notes": "Multiple issues. System should identify the billing issue as primary concern."
+    },
+    {
+      "id": "TEST-013",
+      "name": "Simple FAQ Question",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "How do I change my email address?"},
+          {"role": "agent", "content": "You can do that in Account Settings. Would you like me to walk you through it?"},
+          {"role": "customer", "content": "Yes please"}
+        ],
+        "metadata": {
+          "case_id": "CASE-013",
+          "customer_id": "CUST-013",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T13:00:00Z",
+          "initial_category": "account"
+        }
+      },
+      "expected_output": {
+        "decision": "no_escalate",
+        "target_team": null,
+        "should_cite_policy": null
+      },
+      "category": "clear_no_escalation"
+    },
+    {
+      "id": "TEST-014",
+      "name": "Payment Failed - First Contact",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "My payment didn't go through"},
+          {"role": "agent", "content": "Let me help you with that. What error did you see?"},
+          {"role": "customer", "content": "It said card declined but my card is fine"}
+        ],
+        "metadata": {
+          "case_id": "CASE-014",
+          "customer_id": "CUST-014",
+          "prior_contact_count": 1,
+          "created_at": "2026-05-05T13:15:00Z",
+          "initial_category": "payment"
+        }
+      },
+      "expected_output": {
+        "decision": "no_escalate",
+        "target_team": null,
+        "should_cite_policy": null
+      },
+      "category": "clear_no_escalation",
+      "notes": "First contact for payment issue. Can be handled by automated systems initially."
+    },
+    {
+      "id": "TEST-015",
+      "name": "Payment Failed - Second Contact",
+      "input": {
+        "messages": [
+          {"role": "customer", "content": "I'm still having issues with my payment"},
+          {"role": "agent", "content": "I see you contacted us yesterday about this. What's happening now?"},
+          {"role": "customer", "content": "Same problem. Card declined even though I tried a different card"}
+        ],
+        "metadata": {
+          "case_id": "CASE-015",
+          "customer_id": "CUST-015",
+          "prior_contact_count": 2,
+          "created_at": "2026-05-05T13:30:00Z",
+          "initial_category": "payment"
+        }
+      },
+      "expected_output": {
+        "decision": "escalate",
+        "target_team": "Billing Team",
+        "should_cite_policy": "POLICY-009"
+      },
+      "category": "clear_escalation",
+      "notes": "Second contact for payment issue. Meets conditional escalation threshold."
+    }
+  ]
+}
