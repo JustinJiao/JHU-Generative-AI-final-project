@@ -76,20 +76,23 @@ cd backend/src
 python app.py
 ```
 
-### API Key Configuration (Optional)
+### API Key Configuration (Optional but Recommended)
 
 The system works in **two modes**:
 
-**1. Mock Mode (Default - No Setup Required)**
-- ✅ Perfect for testing and demos
+**1. Mock Mode (No API Key)**
 - ✅ Works immediately after cloning
-- Uses rule-based intelligent responses
+- Uses rule-based pattern matching for escalation detection
+- Suitable for basic testing
 - No external API calls or costs
 
-**2. Full LLM Mode (OpenAI API Key Required)**
-- Real AI-powered decisions using GPT-4o-mini
-- More sophisticated reasoning
-- Requires OpenAI API key
+**2. Full LLM Mode (OpenAI API Key Required) - ⭐ Recommended**
+- ✅ **Real AI-powered decisions** using GPT-4o-mini
+- ✅ **Intelligent metadata extraction** from conversations
+- ✅ **Context-aware reasoning** for escalation decisions
+- ✅ **Dynamic policy interpretation**
+- More sophisticated and accurate than rule-based approach
+- Requires valid OpenAI API key
 
 **To enable Full LLM Mode:**
 
