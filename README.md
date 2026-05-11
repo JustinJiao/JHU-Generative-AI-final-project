@@ -1,63 +1,315 @@
 # Customer Support Escalation Decision Assistant
 
-An AI-powered system to automatically determine whether customer support cases should be escalated to specialized teams, using LLM + policy retrieval.
+An AI-powered system that automatically determines whether customer support cases should be escalated to specialized teams, using LLM + policy retrieval architecture.
 
-## Features
+---
 
-- **Main System**: LLM + Policy Retrieval for intelligent escalation decisions
-- **Real-time Monitoring**: Monitor live conversations and auto-escalate when policies match
-- **Database Integration**: SQLite database tracks customer history and improves decisions
-- **Baseline Methods**: Prompt-only LLM and keyword-based rule matching for comparison
-- **Triple Web Interface**:
-  - Batch Analysis UI for completed conversations
-  - Real-time Monitor UI for live conversation tracking
-  - Interactive Demo UI with pre-configured scenarios
-- **Test Dataset**: 15 labeled test cases covering various scenarios
-- **Analytics API**: Query conversation history, escalation stats, and customer patterns
+## 1. Context, User, and Problem
 
-## Quick Start
+### The User
+**Customer support managers and agents** in high-volume service environments who handle hundreds of cases daily across billing, technical, security, and legal issues.
+
+### The Workflow Challenge
+Traditional escalation systems suffer from:
+- **Manual decision-making bottlenecks**: Agents must manually read policies and decide if cases warrant escalation
+- **Inconsistent decisions**: Different agents interpret escalation criteria differently
+- **Missed critical cases**: High-value refunds, security threats, or repeat issues may slip through
+- **Delayed escalations**: Time spent deliberating means customers wait longer for proper help
+
+### Why It Matters
+**Impact on business and customers:**
+- Delayed escalations increase customer churn and damage brand reputation
+- Over-escalation wastes specialist team resources
+- Under-escalation allows critical issues (fraud, legal threats) to worsen
+- Inconsistent handling creates poor customer experiences
+
+**The opportunity:** An AI system that instantly analyzes conversations against company policies can:
+- Reduce escalation decision time from minutes to seconds
+- Ensure consistent, policy-grounded decisions 24/7
+- Catch critical patterns (repeat contacts, high-value issues) that humans might miss
+- Free agents to focus on customer empathy rather than policy memorization
+
+---
+
+## 2. Solution and Design
+
+### What We Built
+
+A **three-tier escalation decision system** with:
+
+1. **Main System (LLM + Policy Retrieval)**: Combines intelligent policy matching with GPT-4o-mini reasoning
+2. **Baseline 1 (Prompt-Only LLM)**: Simple LLM without structured policy retrieval
+3. **Baseline 2 (Keyword Rules)**: Traditional rule-based matching
+
+Plus **three web interfaces** for different use cases:
+- **Batch Analysis UI**: Analyze completed conversations
+- **Real-time Monitor UI**: Track live conversations with automatic escalation detection
+- **Interactive Demo UI**: Pre-configured scenarios for quick testing
+
+### How It Works
+
+#### Main System Architecture
+
+```
+Input: Conversation + Metadata
+         ↓
+    Policy Retrieval
+    (Match relevant policies)
+         ↓
+    LLM Decision Engine
+    (Reason with policies)
+         ↓
+Output: Decision + Team + Reasoning
+```
+
+**Step 1: Policy Retrieval**
+- Matches conversation against 8 escalation policies using keyword and metadata filters
+- Policies cover: repeat issues, fraud/security, legal threats, high-value refunds, VIP customers, data privacy, manager requests, technical emergencies
+- Returns only relevant policies to focus LLM attention
+
+**Step 2: LLM Decision Making**
+- GPT-4o-mini analyzes conversation with retrieved policies
+- Generates structured decision: escalate/no_escalate
+- Provides reasoning grounded in specific policies
+- Assigns target team and priority level
+
+**Step 3: Database Integration**
+- Stores all conversations in SQLite database
+- Tracks customer history for repeat issue detection
+- Enables pattern analysis and analytics
+
+#### Key Design Choices
+
+**1. Why LLM + Retrieval vs. Pure LLM?**
+- **Policy grounding**: Retrieved policies force LLM to cite specific rules, increasing transparency
+- **Consistency**: Same policy set ensures all decisions follow company guidelines
+- **Efficiency**: Only relevant policies in prompt reduces token usage
+- **Maintainability**: Update policies without retraining models
+
+**2. Why SQLite Database?**
+- **Customer history**: Track prior_contact_count to detect repeat issues (critical for escalation)
+- **Pattern detection**: Identify customers with recurring problems
+- **Analytics**: Query escalation trends over time
+- **Zero setup**: No external database required for deployment
+
+**3. Why Three Interfaces?**
+- **Batch Analysis**: For reviewing completed cases in bulk
+- **Real-time Monitor**: For agents monitoring live conversations
+- **Interactive Demo**: For stakeholders and quick testing
+
+**4. Metadata Extraction with LLM**
+- Uses GPT-4o-mini to extract structured metadata (customer_id, issue_type, refund_amount)
+- Enables policy rules based on values not explicitly stated
+- Example: "I want my $600 back" → refund_amount: 600 → triggers high-value refund policy
+
+#### System Components
+
+| Component | Purpose | Technology |
+|-----------|---------|------------|
+| **PolicyRetriever** | Match conversations to policies | Keyword + metadata filtering |
+| **DecisionEngine** | Make escalation decisions | GPT-4o-mini + structured prompts |
+| **MetadataExtractor** | Extract key details from text | GPT-4o-mini |
+| **ConversationMonitor** | Real-time conversation tracking | In-memory state + event detection |
+| **Database** | Customer history & analytics | SQLite |
+| **Baselines** | Comparison methods | Rule-based + simple prompting |
+
+---
+
+## 3. Evaluation and Results
+
+### Test Dataset
+**15 labeled test cases** covering:
+- Clear escalations: Repeat issues, fraud, legal threats, high refunds
+- Edge cases: Angry but simple issues, polite but complex issues
+- No-escalation cases: Simple FAQs, routine inquiries
+- Mixed issues: Multiple problem types in one conversation
+
+### Evaluation Metrics
+- **Accuracy**: Correct escalate/no_escalate decisions
+- **False Positive Rate**: Unnecessary escalations (wastes specialist resources)
+- **False Negative Rate**: Missed escalations (critical for customer safety)
+
+### Results Summary
+
+| System | Accuracy | FP Rate | FN Rate | Correct |
+|--------|----------|---------|---------|---------|
+| **Main (LLM + Retrieval)** | **86.7%** | 6.7% | 6.7% | 13/15 |
+| Baseline 1 (Prompt-Only) | 80.0% | 13.3% | 6.7% | 12/15 |
+| Baseline 2 (Keyword Rules) | 73.3% | 13.3% | 13.3% | 11/15 |
+
+### Key Findings
+
+**1. Main System Outperforms Baselines**
+- 6.7% higher accuracy than Prompt-Only LLM
+- 13.4% higher accuracy than Keyword Rules
+- **Balanced FP/FN rates**: Low false positives (6.7%) avoid specialist overload
+- **Best recall**: Only 6.7% false negatives minimize missed critical cases
+
+**2. Policy Retrieval Improves Consistency**
+- Baseline 1 (Prompt-Only) has 2x false positive rate (13.3% vs 6.7%)
+- Main system's structured policy matching reduces over-escalation
+- Example: "Angry But Simple Issue" (TEST-009) correctly not escalated by Main, incorrectly escalated by both baselines
+
+**3. Keyword Rules Miss Nuance**
+- Baseline 2 (Keyword Rules) worst performance (73.3%)
+- Misses data privacy request (TEST-011) - requires semantic understanding
+- Over-escalates angry customers with simple issues
+- Cannot handle context or tone
+
+**4. Remaining Challenges**
+Both Main system errors are edge cases:
+- **TEST-008 (Account Cancellation)**: System didn't escalate to Retention Team
+  - *Root cause*: Requires business logic (retention value) not explicit in policies
+- **TEST-014 (Payment Failed - First Contact)**: System over-escalated
+  - *Root cause*: Payment issues flagged by multiple policies even for first contact
+
+### Comparison Baseline
+We compared against:
+1. **Prompt-Only LLM**: Same GPT-4o-mini model without structured policy retrieval
+2. **Keyword Rule Baseline**: Traditional rule-based system matching keywords like "fraud", "legal", "manager"
+
+This demonstrates that **LLM + Retrieval architecture** combines the best of both worlds:
+- Semantic understanding from LLM
+- Structured consistency from policy retrieval
+
+---
+
+## 4. Artifact Snapshot
+
+### Screenshots
+
+#### 1. Interactive Demo Interface
+*[PLACEHOLDER: Screenshot of demo.html showing pre-configured scenarios, real-time workflow visualization, and escalation decision display]*
+
+**What it shows:**
+- 6 pre-configured test scenarios
+- Click-to-load conversation examples
+- Real-time decision output with reasoning
+- Statistics dashboard
+
+#### 2. Real-time Conversation Monitor
+*[PLACEHOLDER: Screenshot of monitor.html showing live conversation tracking, message-by-message analysis, and automatic escalation detection]*
+
+**What it shows:**
+- Start/stop conversation tracking
+- Add messages dynamically
+- Real-time escalation trigger detection
+- Customer history from database
+
+#### 3. Batch Analysis Interface
+*[PLACEHOLDER: Screenshot of index.html showing side-by-side comparison of all three methods (Main, Baseline1, Baseline2) for a test case]*
+
+**What it shows:**
+- Full conversation input
+- Metadata fields
+- "Compare All Methods" side-by-side results
+- Decision reasoning for each method
+
+#### 4. Sample Decision Output
+*[PLACEHOLDER: Screenshot or code block showing structured JSON decision output with escalate decision, target_team, reasoning, policy_citations, and confidence score]*
+
+### Sample Input/Output
+
+**Example 1: Repeat Issue Escalation**
+```json
+INPUT:
+{
+  "messages": [
+    {"role": "customer", "content": "I was charged twice for my subscription."},
+    {"role": "agent", "content": "I apologize. Can you provide your order number?"},
+    {"role": "customer", "content": "This is my third time contacting support! Order #12345"}
+  ],
+  "metadata": {
+    "case_id": "CASE-001",
+    "prior_contact_count": 3,
+    "initial_category": "billing"
+  }
+}
+
+OUTPUT:
+{
+  "decision": "escalate",
+  "target_team": "Senior Support",
+  "priority": "high",
+  "confidence": 0.95,
+  "reasoning": "Customer has contacted support 3 times about the same billing issue...",
+  "policy_citations": ["POLICY-001: Repeated Unresolved Issues"],
+  "recommended_actions": [
+    "Prioritize immediate resolution",
+    "Review prior contact history",
+    "Consider compensation"
+  ]
+}
+```
+
+**Example 2: Security Threat Escalation**
+```json
+INPUT:
+{
+  "messages": [
+    {"role": "customer", "content": "I see unauthorized charges on my account!"},
+    {"role": "customer", "content": "Someone hacked my account and made fraudulent purchases"}
+  ],
+  "metadata": {
+    "case_id": "CASE-002",
+    "initial_category": "security"
+  }
+}
+
+OUTPUT:
+{
+  "decision": "escalate",
+  "target_team": "Security Team",
+  "priority": "critical",
+  "confidence": 0.98,
+  "reasoning": "Potential account breach with fraudulent activity...",
+  "policy_citations": ["POLICY-002: Security and Fraud Threats"],
+  "recommended_actions": [
+    "Freeze account immediately",
+    "Initiate fraud investigation",
+    "Issue temporary credentials"
+  ]
+}
+```
+
+### Short Video Demo
+**[Watch the demo video on YouTube](https://youtu.be/AapmiImXPpM)**
+
+This 2-minute demo shows:
+1. Cloning the repository
+2. Running `./run.sh` to start the server
+3. Testing the Interactive Demo interface
+4. Trying different escalation scenarios
+5. Viewing real-time decision outputs with reasoning
+
+---
+
+## Setup and Usage Instructions
 
 ### Prerequisites
 - Python 3.8 or higher
 - pip (Python package manager)
+- Git (to clone repository)
 
-### Installation & Running
+### Installation
 
-**The easiest way:** Just clone and run the startup script!
+**Option 1: Automated Setup (Recommended)**
 
 ```bash
 # Clone the repository
 git clone https://github.com/JustinJiao/JHU-Generative-AI-final-project.git
 cd JHU-Generative-AI-final-project
 
-# Run the automated setup script
+# Run automated setup script
 ./run.sh
 ```
 
-**That's it!** The script will automatically:
-- Create a virtual environment (`venv/`)
-- Install all dependencies from `requirements.txt`
-- Start the server at `http://localhost:8000`
+**That's it!** The script automatically:
+- Creates a virtual environment (`venv/`)
+- Installs dependencies from `requirements.txt`
+- Starts the server at `http://localhost:8000`
 
-### Alternative Startup Scripts
-
-```bash
-# Option 1: Quick start (recommended for first-time users)
-./run.sh
-
-# Option 2: Start with cleanup (if port 8000 is busy)
-./start_server.sh
-
-# Option 3: Start with OpenAI (requires .env setup)
-./START_WITH_OPENAI.sh
-
-# Option 4: Cross-platform Python launcher
-python run.py
-```
-
-### Manual Setup (If Needed)
-
-If the automated scripts don't work:
+**Option 2: Manual Setup**
 
 ```bash
 # 1. Create virtual environment
@@ -76,25 +328,26 @@ cd backend/src
 python app.py
 ```
 
-### API Key Configuration (Optional but Recommended)
+### Configuration
 
 The system works in **two modes**:
 
-**1. Mock Mode (No API Key)**
-- ✅ Works immediately after cloning
-- Uses rule-based pattern matching for escalation detection
-- Suitable for basic testing
+#### Mode 1: Mock Mode (No API Key) - Works Immediately
+- Uses rule-based pattern matching
 - No external API calls or costs
+- Suitable for testing and demonstration
+- Automatically enabled if no API key provided
 
-**2. Full LLM Mode (OpenAI API Key Required) - ⭐ Recommended**
-- ✅ **Real AI-powered decisions** using GPT-4o-mini
-- ✅ **Intelligent metadata extraction** from conversations
-- ✅ **Context-aware reasoning** for escalation decisions
-- ✅ **Dynamic policy interpretation**
-- More sophisticated and accurate than rule-based approach
-- Requires valid OpenAI API key
+#### Mode 2: Full LLM Mode (OpenAI API Key) - Recommended for Best Performance
 
-**To enable Full LLM Mode:**
+**Why use Full LLM Mode:**
+- Real AI-powered decisions using GPT-4o-mini
+- Intelligent metadata extraction from conversations
+- Context-aware reasoning for escalation decisions
+- Dynamic policy interpretation
+- Much more accurate than rule-based approach (86.7% vs 73.3% accuracy)
+
+**Setup Full LLM Mode:**
 
 ```bash
 # Step 1: Create .env file from template
@@ -113,99 +366,219 @@ export OPENAI_API_KEY="sk-your-key"    # Mac/Linux
 set OPENAI_API_KEY=sk-your-key         # Windows
 ```
 
-## Usage
+---
 
-Once the server is running, **open your browser** to:
+## Usage Examples
 
-### 🌐 Main Dashboard
-**URL:** `http://localhost:8000`
+### Example 1: Interactive Demo (Quickest Way to Test)
 
-### Available Web Interfaces
+1. **Start the server** (if not already running):
+   ```bash
+   ./run.sh
+   ```
 
-#### 1. **Interactive Demo** (Recommended for First-Time Users)
-**URL:** `http://localhost:8000/static/demo.html`
+2. **Open Interactive Demo** in your browser:
+   ```
+   http://localhost:8000/static/demo.html
+   ```
 
-Pre-configured scenarios for quick testing:
-- Security Threat Detection
-- Repeat Issue Escalation
-- Legal Threat Handling
-- VIP Customer Support
-- Large Refund Requests
-- Normal Issue Resolution
+3. **Try a scenario:**
+   - Click "Security Threat Detection" scenario
+   - Conversation auto-fills with pre-configured messages
+   - See instant escalation decision with:
+     - Decision: escalate / no_escalate
+     - Target team assignment
+     - Priority level
+     - Reasoning and policy citations
+     - Recommended actions
 
-Features:
-- Click a scenario to auto-fill conversation
-- Real-time workflow visualization
-- Live escalation decision display
-- Statistics dashboard
+4. **Try other scenarios:**
+   - Repeat Issue Escalation
+   - Legal Threat Handling
+   - VIP Customer Support
+   - Large Refund Requests
+   - Normal Issue (No Escalation)
 
-#### 2. **Real-time Monitor**
-**URL:** `http://localhost:8000/static/monitor.html`
+### Example 2: Real-time Conversation Monitoring
 
-For monitoring live conversations:
-1. Click "Start New Conversation"
-2. Add messages as conversation progresses
-3. System automatically detects escalation triggers
-4. View customer history from database
-5. All conversations saved for analysis
+1. **Open Real-time Monitor**:
+   ```
+   http://localhost:8000/static/monitor.html
+   ```
 
-**Key Advantage:** Automatically loads customer history - repeat customers detected without manual input!
+2. **Start a new conversation:**
+   - Click "Start New Conversation"
+   - Enter customer ID (e.g., "CUST-001")
 
-#### 3. **Batch Analysis**
-**URL:** `http://localhost:8000` (Main page)
+3. **Add messages as conversation progresses:**
+   - Type customer message → Click "Add Customer Message"
+   - Type agent response → Click "Add Agent Message"
+   - System automatically checks for escalation triggers after each message
 
-For analyzing completed conversations:
-1. Enter full conversation text
-2. Fill in case metadata
-3. Click "Analyze Case" for decision
-4. Or "Compare All Methods" to see all three approaches side-by-side
+4. **View results:**
+   - Real-time escalation detection
+   - Customer history automatically loaded from database
+   - Full conversation summary with decision reasoning
 
-### API Endpoints
+### Example 3: Batch Analysis
 
-#### Main Decision Endpoint
+1. **Open Batch Analysis UI**:
+   ```
+   http://localhost:8000
+   ```
+
+2. **Enter a conversation:**
+   ```
+   Customer: I was charged twice for my subscription
+   Agent: I apologize. Can you provide your order number?
+   Customer: This is my third time contacting support! Order #12345
+   ```
+
+3. **Fill metadata:**
+   - Case ID: CASE-001
+   - Prior Contact Count: 3
+   - Category: billing
+
+4. **Click "Analyze Case"** or **"Compare All Methods"** to see:
+   - Main System decision
+   - Baseline 1 (Prompt-Only) decision
+   - Baseline 2 (Keyword Rules) decision
+   - Side-by-side comparison
+
+### Example 4: API Usage (For Developers)
+
+**Make a decision via API:**
+
 ```bash
-POST /api/decide
-Content-Type: application/json
+curl -X POST http://localhost:8000/api/decide \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "customer", "content": "I see unauthorized charges on my account!"},
+      {"role": "customer", "content": "Someone hacked my account"}
+    ],
+    "metadata": {
+      "case_id": "CASE-002",
+      "customer_id": "CUST-002",
+      "initial_category": "security"
+    }
+  }'
+```
 
+**Response:**
+```json
+{
+  "decision": "escalate",
+  "target_team": "Security Team",
+  "priority": "critical",
+  "confidence": 0.98,
+  "reasoning": "Potential account breach with fraudulent activity...",
+  "policy_citations": ["POLICY-002: Security and Fraud Threats"],
+  "recommended_actions": [...]
+}
+```
+
+### Example 5: Running Evaluation Tests
+
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Run evaluation on all 15 test cases
+cd backend/src
+python evaluate.py
+```
+
+**Output:**
+```
+EVALUATION SUMMARY
++-----------+-----------+------------+-----------+-----------+
+| System    | Correct   | Accuracy   | FP Rate   | FN Rate   |
++-----------+-----------+------------+-----------+-----------+
+| MAIN      | 13/15     | 86.7%      | 6.7%      | 6.7%      |
+| BASELINE1 | 12/15     | 80.0%      | 13.3%     | 6.7%      |
+| BASELINE2 | 11/15     | 73.3%      | 13.3%     | 13.3%     |
++-----------+-----------+------------+-----------+-----------+
+```
+
+Results exported to `backend/evaluation_results.json`
+
+---
+
+## API Documentation
+
+### Core Endpoints
+
+#### `POST /api/decide`
+Main decision endpoint using LLM + Policy Retrieval
+
+**Request Body:**
+```json
 {
   "messages": [
-    {"role": "customer", "content": "I was charged twice"},
-    {"role": "agent", "content": "Let me help you with that"}
+    {"role": "customer", "content": "..."},
+    {"role": "agent", "content": "..."}
   ],
   "metadata": {
     "case_id": "CASE-001",
+    "customer_id": "CUST-001",
     "prior_contact_count": 3,
     "initial_category": "billing"
   }
 }
 ```
 
-#### Baseline Comparisons
-```bash
-POST /api/baseline1    # Prompt-only LLM
-POST /api/baseline2    # Keyword rules
+**Response:**
+```json
+{
+  "decision": "escalate",
+  "target_team": "Senior Support",
+  "priority": "high",
+  "confidence": 0.95,
+  "reasoning": "...",
+  "policy_citations": ["POLICY-001"],
+  "recommended_actions": ["..."]
+}
 ```
 
-#### System Information
-```bash
-GET /api/health        # Health check
-GET /api/policies      # Get all escalation policies
-GET /api/stats         # System statistics
-```
+#### `POST /api/baseline1`
+Prompt-only LLM baseline (no policy retrieval)
 
-#### Database Queries
-```bash
-GET /api/conversations/recent?limit=10
-GET /api/customer/{customer_id}/history
-```
+#### `POST /api/baseline2`
+Keyword rule-based baseline
 
-#### Real-time Monitoring
-```bash
-POST /api/monitor/start       # Start conversation monitoring
-POST /api/monitor/message     # Add message and check escalation
-POST /api/monitor/end         # End conversation
-GET  /api/monitor/summary/{id} # Get conversation summary
-```
+#### `GET /api/policies`
+Get all escalation policies
+
+#### `GET /api/stats`
+Get system statistics (total conversations, escalation rate, etc.)
+
+#### `GET /api/health`
+Health check endpoint
+
+### Real-time Monitoring Endpoints
+
+#### `POST /api/monitor/start`
+Start monitoring a new conversation
+
+#### `POST /api/monitor/message`
+Add message and check for escalation triggers
+
+#### `POST /api/monitor/end`
+End conversation monitoring
+
+#### `GET /api/monitor/summary/{conversation_id}`
+Get full conversation summary
+
+### Database Query Endpoints
+
+#### `GET /api/conversations/recent?limit=10`
+Get recent conversations
+
+#### `GET /api/customer/{customer_id}/history`
+Get customer conversation history
+
+---
 
 ## Project Structure
 
@@ -215,7 +588,7 @@ Project/
 ├── requirements.txt             # Python dependencies
 ├── .env.example                 # Environment variables template
 ├── run.sh                       # Quick start script (recommended)
-├── start_server.sh              # Start with cleanup
+├── start_server.sh              # Start with port cleanup
 ├── START_WITH_OPENAI.sh         # Start with OpenAI mode
 ├── run.py                       # Cross-platform Python launcher
 ├── escalation.db                # SQLite database (auto-created)
@@ -224,63 +597,83 @@ Project/
 │   │   ├── app.py              # FastAPI server
 │   │   ├── models.py           # Pydantic data models
 │   │   ├── decision_engine.py  # LLM decision engine
-│   │   ├── policy_retriever.py # Policy matching
+│   │   ├── policy_retriever.py # Policy matching logic
 │   │   ├── database.py         # SQLite operations
 │   │   ├── conversation_monitor.py  # Real-time monitoring
-│   │   ├── issue_similarity.py      # Similarity detection
-│   │   ├── metadata_extractor.py    # Metadata extraction
+│   │   ├── issue_similarity.py      # Repeat issue detection
+│   │   ├── metadata_extractor.py    # LLM metadata extraction
 │   │   ├── baselines.py             # Baseline implementations
-│   │   └── evaluate.py              # Evaluation metrics
+│   │   └── evaluate.py              # Evaluation script
 │   └── data/
-│       ├── escalation_policies.json # Policy rules
-│       └── test_cases.json          # Test dataset
+│       ├── escalation_policies.json # 8 escalation policies
+│       └── test_cases.json          # 15 test cases
 └── static/
     ├── index.html               # Batch analysis UI
     ├── monitor.html             # Real-time monitor UI
     └── demo.html                # Interactive demo UI
 ```
 
-## System Architecture
+---
 
-### Decision Flow
+## Troubleshooting
 
-1. **Input**: Conversation messages + metadata
-2. **Policy Retrieval**: Find relevant escalation policies
-3. **LLM Analysis**: Intelligent decision using GPT + policies
-4. **Output**: Structured decision with reasoning and citations
+### Server won't start - Port 8000 already in use
+```bash
+# Check what's using port 8000
+lsof -i:8000
 
-### Key Components
+# Kill the process
+kill -9 <PID>
 
-- **PolicyRetriever**: Matches input against policy rules using keywords and metadata
-- **DecisionEngine**: Uses LLM to make intelligent, context-aware decisions
-- **ConversationMonitor**: Real-time monitoring with automatic escalation detection
-- **Database**: SQLite for customer history and pattern recognition
-- **Baselines**: Simple alternatives for comparison (prompt-only, keyword-based)
+# Or use the cleanup script
+./start_server.sh
+```
 
-## Example Test Cases
+### Dependencies not installing
+```bash
+# Update pip first
+pip install --upgrade pip
 
-The system includes 15 pre-configured test cases covering:
+# Install with verbose output
+pip install -r requirements.txt -v
+```
 
-- ✅ Repeated unresolved issues
-- ✅ Fraud and security threats
-- ✅ Legal threats and complaints
-- ✅ Large refund requests
-- ✅ VIP customer handling
-- ✅ Technical emergencies
-- ✅ Simple inquiries (no escalation)
+### Virtual environment issues
+```bash
+# Delete and recreate venv
+rm -rf venv
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
-## Policy Configuration
+### OpenAI API key not working
+```bash
+# Check .env file format (no spaces around =)
+cat .env
+
+# Correct format:
+# OPENAI_API_KEY=sk-abc123
+
+# Wrong format:
+# OPENAI_API_KEY = sk-abc123
+
+# Test if key is loaded
+python -c "from dotenv import load_dotenv; import os; load_dotenv(); print(os.getenv('OPENAI_API_KEY'))"
+```
+
+### Browser shows "Connection refused"
+- Make sure server is running: Check terminal for "Uvicorn running on http://0.0.0.0:8000"
+- Try http://127.0.0.1:8000 instead of localhost
+- Check firewall isn't blocking port 8000
+
+---
+
+## Technical Implementation Details
+
+### Policy Configuration
 
 Policies are defined in `backend/data/escalation_policies.json`. Each policy includes:
-
-- **id**: Unique identifier
-- **condition**: Matching rules (keyword, metadata, composite)
-- **action**: escalate / no_escalate / conditional_escalate
-- **target_team**: Which team to route to
-- **priority**: critical / high / medium / low
-- **description**: Explanation of the policy
-
-### Example Policy
 
 ```json
 {
@@ -299,95 +692,87 @@ Policies are defined in `backend/data/escalation_policies.json`. Each policy inc
 }
 ```
 
-## Evaluation Metrics
-
-The system supports evaluation on:
-
-- **Decision Accuracy**: Correct escalate/no_escalate decisions
-- **False Positive Rate**: Unnecessary escalations
-- **False Negative Rate**: Missed escalations
-- **Policy Grounding**: Decisions properly cited with policies
-- **Consistency**: Same input → same output
-
-## Troubleshooting
-
-### Server won't start
-```bash
-# Check if port 8000 is already in use
-lsof -i:8000
-
-# Kill the process using port 8000
-kill -9 <PID>
-
-# Or use the cleanup script
-./start_server.sh
-```
-
-### Dependencies not installing
-```bash
-# Update pip first
-pip install --upgrade pip
-
-# Install dependencies with verbose output
-pip install -r requirements.txt -v
-```
-
-### Virtual environment issues
-```bash
-# Delete and recreate venv
-rm -rf venv
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### API key not working
-```bash
-# Check if .env file exists and has correct format
-cat .env
-
-# Ensure no spaces around the = sign
-# Correct:   OPENAI_API_KEY=sk-abc123
-# Wrong:     OPENAI_API_KEY = sk-abc123
-
-# Test if key is loaded
-python -c "from dotenv import load_dotenv; import os; load_dotenv(); print(os.getenv('OPENAI_API_KEY'))"
-```
-
-## Development
+**Policy types:**
+- **keyword**: Match text patterns (e.g., "fraud", "legal")
+- **metadata**: Match metadata fields (e.g., prior_contact_count >= 3)
+- **composite**: Combine multiple conditions with AND/OR logic
 
 ### Adding New Policies
 
-Edit `backend/data/escalation_policies.json` to add new rules.
+Edit `backend/data/escalation_policies.json`:
+
+```json
+{
+  "id": "POLICY-009",
+  "name": "Your New Policy",
+  "condition": {
+    "type": "keyword",
+    "keywords": ["urgent", "emergency"]
+  },
+  "action": "escalate",
+  "target_team": "Emergency Response",
+  "priority": "critical",
+  "description": "Handle urgent emergencies"
+}
+```
+
+No code changes required - policies are loaded dynamically!
+
+### Extending the System
+
+**Add new metadata fields:**
+1. Update `CaseMetadata` in `backend/src/models.py`
+2. Update metadata extraction in `backend/src/metadata_extractor.py`
+3. Add policies that use the new field
+
+**Add new decision logic:**
+1. Modify prompt in `backend/src/decision_engine.py`
+2. Update `DecisionOutput` model if needed
+
+**Add new baseline:**
+1. Create new class in `backend/src/baselines.py`
+2. Add endpoint in `backend/src/app.py`
+3. Update evaluation script
+
+---
+
+## Development
 
 ### Running Tests
-
 ```bash
-# Activate virtual environment
 source venv/bin/activate
-
-# Run evaluation
 cd backend/src
 python evaluate.py
 ```
 
 ### API Documentation
+Visit when server is running:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
 
-Once the server is running, visit:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+### Database Inspection
+```bash
+sqlite3 escalation.db
+sqlite> .tables
+sqlite> SELECT * FROM conversations LIMIT 5;
+sqlite> .quit
+```
+
+---
 
 ## License
 
 This is an academic project for the JHU Generative AI course.
 
+---
+
 ## Support
 
 For issues or questions:
-1. Check the troubleshooting section above
-2. Review the code documentation
+1. Check the [Troubleshooting](#troubleshooting) section
+2. Review API documentation at http://localhost:8000/docs
 3. Open an issue in the repository
 
 ---
 
-**Ready to start?** Just run `./run.sh` and open `http://localhost:8000/static/demo.html` in your browser! 🚀
+**Ready to start?** Just run `./run.sh` and open http://localhost:8000/static/demo.html in your browser!
