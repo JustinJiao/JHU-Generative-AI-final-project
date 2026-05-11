@@ -178,7 +178,7 @@ This demonstrates that **LLM + Retrieval architecture** combines the best of bot
 
 ### Video Demo
 
-**[Watch the demo video on YouTube](https://youtu.be/AapmiImXPpM)**
+**[Watch the demo video on YouTube](https://youtu.be/QPrLJjgRJvU)**
 
 This 2-minute demo shows:
 - Full system walkthrough with all three interfaces
