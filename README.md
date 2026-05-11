@@ -176,37 +176,16 @@ This demonstrates that **LLM + Retrieval architecture** combines the best of bot
 
 ## 4. Artifact Snapshot
 
-### Screenshots
+### Video Demo
 
-#### 1. Interactive Demo Interface
-*[PLACEHOLDER: Screenshot of demo.html showing pre-configured scenarios, real-time workflow visualization, and escalation decision display]*
+**[Watch the demo video on YouTube](https://youtu.be/AapmiImXPpM)**
 
-**What it shows:**
-- 6 pre-configured test scenarios
-- Click-to-load conversation examples
-- Real-time decision output with reasoning
-- Statistics dashboard
-
-#### 2. Real-time Conversation Monitor
-*[PLACEHOLDER: Screenshot of monitor.html showing live conversation tracking, message-by-message analysis, and automatic escalation detection]*
-
-**What it shows:**
-- Start/stop conversation tracking
-- Add messages dynamically
-- Real-time escalation trigger detection
-- Customer history from database
-
-#### 3. Batch Analysis Interface
-*[PLACEHOLDER: Screenshot of index.html showing side-by-side comparison of all three methods (Main, Baseline1, Baseline2) for a test case]*
-
-**What it shows:**
-- Full conversation input
-- Metadata fields
-- "Compare All Methods" side-by-side results
-- Decision reasoning for each method
-
-#### 4. Sample Decision Output
-*[PLACEHOLDER: Screenshot or code block showing structured JSON decision output with escalate decision, target_team, reasoning, policy_citations, and confidence score]*
+This 2-minute demo shows:
+- Full system walkthrough with all three interfaces
+- Cloning the repository and running `./run.sh`
+- Testing pre-configured escalation scenarios
+- Real-time decision outputs with reasoning and policy citations
+- Side-by-side comparison of Main System vs Baselines
 
 ### Sample Input/Output
 
@@ -271,16 +250,6 @@ OUTPUT:
   ]
 }
 ```
-
-### Short Video Demo
-**[Watch the demo video on YouTube](https://youtu.be/AapmiImXPpM)**
-
-This 2-minute demo shows:
-1. Cloning the repository
-2. Running `./run.sh` to start the server
-3. Testing the Interactive Demo interface
-4. Trying different escalation scenarios
-5. Viewing real-time decision outputs with reasoning
 
 ---
 
